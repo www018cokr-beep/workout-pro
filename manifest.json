@@ -1,8 +1,8 @@
 {
   "name": "Retro Workout Pro",
   "short_name": "Workout",
-  "start_url": "/workout-pro/",
-  "scope": "/workout-pro/",
+  "start_url": "https://www018cokr-beep.github.io/workout-pro/",
+  "scope": "https://www018cokr-beep.github.io/workout-pro/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
