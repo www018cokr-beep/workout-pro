@@ -5,86 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RETRO WORKOUT PRO</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-  
   <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    * { -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Galmuri11', sans-serif; background-color: #f4f4f5; }
-    .pixel-shadow { box-shadow: 4px 4px 0px 0px #000000; }
-    .pixel-shadow-sm { box-shadow: 2px 2px 0px 0px #000000; }
-    .pixel-active:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px #000000; }
+    .pixel-shadow { box-shadow: 4px 4px 0px 0px #000; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body class="m-0 p-0 text-black select-none overflow-hidden">
-
-  <div class="flex flex-col h-[100dvh] max-w-md mx-auto relative bg-white border-x-4 border-black">
-    <header class="shrink-0 px-6 pt-8 pb-4 flex justify-between items-end border-b-4 border-black bg-white">
-      <h1 class="text-2xl font-black tracking-tighter">WORKOUT<span class="text-zinc-500">_PRO</span></h1>
-      <div id="header-date" class="text-[10px] text-zinc-600">YYYY-MM-DD</div>
+  <div class="flex flex-col h-[100dvh] max-w-md mx-auto bg-white border-x-4 border-black">
+    <header class="px-6 pt-8 pb-4 border-b-4 border-black bg-white">
+      <h1 class="text-2xl font-black">WORKOUT<span class="text-zinc-500">_PRO</span></h1>
+      <p id="timerDisplay" class="text-lg font-bold mt-2 text-zinc-600">REST: --:--</p>
     </header>
 
-    <main class="flex-1 overflow-y-auto pb-32 no-scrollbar bg-white p-5">
-      
-      <div class="border-4 border-black bg-zinc-900 p-4 mb-6 pixel-shadow">
-        <p class="text-[10px] text-white font-bold mb-2">>> STOPWATCH</p>
-        <div id="timerDisplay" class="text-4xl font-black text-white text-center mb-4">00:00</div>
-        <div class="flex gap-2">
-          <button onclick="startTimer()" class="flex-1 bg-white py-2 font-black text-xs">START</button>
-          <button onclick="stopTimer()" class="flex-1 bg-zinc-400 py-2 font-black text-xs">STOP</button>
-          <button onclick="resetTimer()" class="flex-1 bg-zinc-600 text-white py-2 font-black text-xs">RESET</button>
-        </div>
+    <main class="flex-1 overflow-y-auto no-scrollbar p-5">
+      <div id="view-record" class="flex flex-col gap-4">
+        <button id="btn-record-set" class="w-full h-32 bg-black text-white font-black text-xl pixel-shadow active:translate-y-2 active:shadow-none">PUSH (RECORD)</button>
+        <div id="timeline-container" class="border-2 border-black p-4"></div>
       </div>
 
-      <div class="border-4 border-black bg-white p-4 mb-6 pixel-shadow">
-        <p class="text-[10px] font-black mb-2">>> ADD_PROTEIN</p>
-        <div class="flex gap-2">
-          <select id="foodSelect" class="flex-1 border-2 border-black p-2 text-xs font-bold bg-zinc-100">
-            <option value="23">닭가슴살 100g (23g)</option>
-            <option value="6">계란 1개 (6g)</option>
-            <option value="20">프로틴 쉐이크 (20g)</option>
-            <option value="21">우둔살 100g (21g)</option>
-          </select>
-          <button onclick="addProtein()" class="bg-black text-white px-4 font-black text-xs">ADD</button>
-        </div>
-        <p class="mt-3 text-xs font-bold">TOTAL: <span id="totalProtein">0</span>g</p>
+      <div id="view-diet" class="hidden flex-col gap-4">
+        <select id="foodSelect" class="w-full border-4 border-black p-3 font-bold">
+          <option value="23">닭가슴살 (23g)</option>
+          <option value="6">계란 (6g)</option>
+        </select>
+        <button onclick="addDiet()" class="bg-white border-4 border-black py-3 font-black">ADD DIET</button>
+        <div id="diet-list" class="border-2 border-black p-4 text-xs font-bold"></div>
       </div>
 
-      <div class="border-4 border-black p-4 pixel-shadow">
-        <p class="text-[10px] font-black mb-2">>> QUICK_LOG</p>
-        <button id="btn-record-set" class="w-full bg-black text-white py-4 font-black text-lg pixel-active">RECORD SET</button>
+      <div id="view-calendar" class="hidden">
+        <div id="calendar-grid" class="grid grid-cols-7 gap-2"></div>
       </div>
     </main>
+
+    <nav class="flex border-t-4 border-black">
+      <button onclick="switchTab('record')" class="flex-1 py-4 font-black border-r-4 border-black">REC</button>
+      <button onclick="switchTab('diet')" class="flex-1 py-4 font-black border-r-4 border-black">DIET</button>
+      <button onclick="switchTab('calendar')" class="flex-1 py-4 font-black">CAL</button>
+    </nav>
   </div>
 
   <script>
-    // --- 타이머 로직 ---
-    let seconds = 0, timerInterval;
+    let records = JSON.parse(localStorage.getItem('data')) || {};
+    let timer, timeLeft = 0;
+
     function startTimer() {
-        if (timerInterval) return;
-        timerInterval = setInterval(() => {
-            seconds++;
-            let m = Math.floor(seconds / 60), s = seconds % 60;
-            document.getElementById('timerDisplay').innerText = 
-                `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        clearInterval(timer);
+        timeLeft = 60;
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerDisplay').innerText = `REST: ${timeLeft}s`;
+            if(timeLeft <= 0) { clearInterval(timer); document.getElementById('timerDisplay').innerText = "REST: --:--"; }
         }, 1000);
     }
-    function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
-    function resetTimer() { stopTimer(); seconds = 0; document.getElementById('timerDisplay').innerText = "00:00"; }
 
-    // --- 식단 로직 ---
-    let totalProtein = 0;
-    function addProtein() {
-        const val = parseInt(document.getElementById('foodSelect').value);
-        totalProtein += val;
-        document.getElementById('totalProtein').innerText = totalProtein;
+    function addRecord(type, data) {
+        const today = new Date().toISOString().split('T')[0];
+        if(!records[today]) records[today] = [];
+        records[today].push({ type, data, time: new Date().toLocaleTimeString() });
+        localStorage.setItem('data', JSON.stringify(records));
     }
 
-    // --- 날짜 ---
-    document.getElementById('header-date').innerText = new Date().toISOString().split('T')[0];
+    document.getElementById('btn-record-set').onclick = () => {
+        addRecord('workout', 'Set Recorded');
+        startTimer();
+        alert('운동 기록 완료! 1분 휴식 시작');
+    };
+
+    function addDiet() {
+        const food = document.getElementById('foodSelect');
+        addRecord('diet', food.options[food.selectedIndex].text);
+        alert('식단 기록 완료!');
+    }
+
+    function switchTab(tab) {
+        ['view-record', 'view-diet', 'view-calendar'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('view-' + tab).classList.remove('hidden');
+    }
   </script>
 </body>
 </html>
