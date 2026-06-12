@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RETRO WORKOUT</title>
   
-  <!-- PWABuilder 통과를 위한 필수 코드 2줄 추가됨 -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ffffff">
   
@@ -82,34 +81,35 @@
         </h1>
         <p class="text-[10px] text-zinc-600 mt-2" id="header-date">YYYY-MM-DD</p>
       </div>
-      <div class="border-2 border-black bg-zinc-200 px-2 py-1 pixel-shadow-sm text-xs font-bold">
-        v1.2
+      <!-- 타이머 및 버전 표시 영역 -->
+      <div id="header-timer" class="hidden border-2 border-black bg-red-600 text-white px-2 py-1 pixel-shadow-sm text-xs font-black animate-pulse">
+        REST 01:00
+      </div>
+      <div id="header-version" class="border-2 border-black bg-zinc-200 px-2 py-1 pixel-shadow-sm text-xs font-bold">
+        v1.3
       </div>
     </header>
 
     <main class="flex-1 overflow-y-auto pb-32 no-scrollbar bg-white">
       
-      <!-- 1. 기록 탭 화면 -->
+      <!-- 1. 기록 탭 화면 (운동) -->
       <div id="view-record" class="flex flex-col min-h-full transition-opacity duration-300">
-        
         <!-- 종목 선택 -->
         <div class="mt-6 px-4">
           <div class="flex justify-between items-end mb-2 border-b-2 border-black pb-1">
             <p class="text-[10px] font-black text-black">>> SELECT_EXERCISE</p>
             <div class="flex items-center gap-2">
               <span class="text-[8px] font-bold text-zinc-500">Hold to reorder</span>
-              <!-- 삭제 버튼 추가 -->
               <button id="btn-open-delete-modal" class="text-[9px] font-bold bg-white text-black border-2 border-black px-1.5 py-0.5 active:bg-zinc-200">[-] REM</button>
               <button id="btn-open-add-modal" class="text-[9px] font-bold bg-black text-white border-2 border-black px-1.5 py-0.5 active:bg-zinc-800">[+] ADD</button>
             </div>
           </div>
-          <!-- 가로 스크롤 복구 -->
           <div id="exercise-list" class="flex gap-3 overflow-x-auto no-scrollbar pb-3 px-1 pt-1">
             <!-- 자바스크립트로 종목 렌더링 -->
           </div>
         </div>
 
-        <!-- 중량(Weight) 및 횟수(Reps) 선택기 -->
+        <!-- 중량 및 횟수 -->
         <div class="mt-6 px-5 grid grid-cols-2 gap-4">
           <div class="border-4 border-black bg-white p-2 pixel-shadow flex flex-col">
             <p class="text-[10px] font-bold text-center mb-2 border-b-2 border-black pb-1">WEIGHT(KG)</p>
@@ -129,7 +129,7 @@
           </div>
         </div>
 
-        <!-- 메인 세트 기록 버튼 (원판 모양) -->
+        <!-- 메인 세트 기록 버튼 -->
         <div class="flex justify-center mt-10 mb-8 relative">
           <button id="btn-record-set" class="relative z-10 w-48 h-48 rounded-full bg-zinc-600 border-[8px] border-black flex flex-col items-center justify-center pixel-shadow transition-transform duration-75 active:translate-x-[4px] active:translate-y-[4px] active:shadow-none outline-none overflow-hidden">
             <div class="absolute inset-2 rounded-full border-4 border-zinc-800 opacity-50 pointer-events-none"></div>
@@ -137,16 +137,16 @@
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white border-[6px] border-black rounded-full pointer-events-none"></div>
             
             <span class="absolute top-8 text-3xl font-black text-white tracking-widest drop-shadow-[2px_2px_0_rgba(0,0,0,1)] pointer-events-none">PUSH</span>
-            <span class="absolute bottom-9 text-xs font-bold text-zinc-300 bg-black px-2 py-0.5 border-2 border-zinc-500 pointer-events-none">RECORD</span>
+            <span class="absolute bottom-9 text-[10px] font-bold text-zinc-300 bg-black px-2 py-0.5 border-2 border-zinc-500 pointer-events-none text-center leading-tight">RECORD &<br>1M REST</span>
           </button>
         </div>
 
-        <!-- 당일 타임라인 -->
+        <!-- 당일 타임라인 (운동 전용) -->
         <div class="px-5 flex-1 flex flex-col">
           <div class="flex items-center justify-between mb-4 border-b-4 border-black pb-2">
-            <p class="text-xs font-black text-black">>> TODAY_LOG</p>
+            <p class="text-xs font-black text-black">>> TODAY_WORKOUT</p>
             <div class="flex items-center gap-2">
-              <button id="btn-undo" class="text-[10px] bg-white text-black border-2 border-black px-2 py-1 font-bold pixel-shadow-sm pixel-active-sm hidden">CANCEL</button>
+              <button id="btn-undo-workout" class="text-[10px] bg-white text-black border-2 border-black px-2 py-1 font-bold pixel-shadow-sm pixel-active-sm hidden">CANCEL</button>
               <span id="today-total-sets" class="text-[10px] bg-black text-white px-2 py-1 font-bold">TOTAL: 0</span>
             </div>
           </div>
@@ -154,10 +154,45 @@
             <div class="text-center py-6 text-zinc-500 text-sm font-bold border-4 border-dashed border-zinc-300">NO DATA YET.</div>
           </div>
         </div>
-        
       </div>
 
-      <!-- 2. 캘린더 탭 화면 -->
+      <!-- 2. 식단 탭 화면 (단백질) -->
+      <div id="view-diet" class="hidden flex-col min-h-full transition-opacity duration-300">
+        <!-- 식단 입력기 -->
+        <div class="mt-6 px-4">
+          <div class="flex justify-between items-end mb-2 border-b-2 border-black pb-1">
+            <p class="text-[10px] font-black text-black">>> ADD_PROTEIN</p>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <select id="food-select" class="flex-1 border-4 border-black bg-zinc-100 p-3 text-xs font-bold outline-none pixel-shadow">
+              <option value="23">닭가슴살 100g (23g)</option>
+              <option value="6">계란 1개 (6g)</option>
+              <option value="20">프로틴 쉐이크 (20g)</option>
+              <option value="21">소고기 우둔살 100g (21g)</option>
+              <option value="15">돼지 목살 100g (15g)</option>
+              <option value="10">그릭 요거트 100g (10g)</option>
+              <option value="0">일반 식사 (기록용)</option>
+            </select>
+            <button id="btn-add-diet" class="bg-black text-white text-sm font-black px-4 border-4 border-black pixel-shadow active:translate-y-[4px] active:translate-x-[4px] active:shadow-none">ADD</button>
+          </div>
+        </div>
+
+        <!-- 당일 식단 타임라인 -->
+        <div class="mt-10 px-5 flex-1 flex flex-col">
+          <div class="flex items-center justify-between mb-4 border-b-4 border-black pb-2">
+            <p class="text-xs font-black text-black">>> TODAY_DIET</p>
+            <div class="flex items-center gap-2">
+              <button id="btn-undo-diet" class="text-[10px] bg-white text-black border-2 border-black px-2 py-1 font-bold pixel-shadow-sm pixel-active-sm hidden">CANCEL</button>
+              <span id="today-total-protein" class="text-[10px] bg-black text-white px-2 py-1 font-bold">TOTAL: 0g</span>
+            </div>
+          </div>
+          <div id="diet-timeline-container" class="flex flex-col gap-4 pb-6">
+            <div class="text-center py-6 text-zinc-500 text-sm font-bold border-4 border-dashed border-zinc-300">NO DATA YET.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 캘린더 탭 화면 -->
       <div id="view-calendar" class="hidden flex-col min-h-full px-5 py-6 transition-opacity duration-300">
         
         <div class="bg-white border-4 border-black pixel-shadow p-4">
@@ -194,11 +229,11 @@
           <span>HEAVY</span>
         </div>
 
-        <!-- 선택된 날짜 상세 내역 -->
+        <!-- 선택된 날짜 상세 내역 (운동 + 식단 통합 표시) -->
         <div id="selected-date-details" class="mt-6 bg-white border-4 border-black pixel-shadow p-4 hidden">
           <div class="flex justify-between items-end mb-4 border-b-4 border-black pb-2">
             <h3 id="selected-date-title" class="font-black text-base text-black">YYYY.MM.DD</h3>
-            <span id="selected-date-count" class="bg-black text-white px-2 py-1 text-xs font-bold">0 SETS</span>
+            <span id="selected-date-summary" class="bg-black text-white px-2 py-1 text-[10px] font-bold">0 SETS / 0g</span>
           </div>
           <div id="selected-date-logs" class="flex flex-col gap-3 max-h-48 overflow-y-auto no-scrollbar">
             <!-- 상세 로그 렌더링 -->
@@ -208,14 +243,17 @@
 
     </main>
 
-    <!-- 하단 네비게이션 -->
+    <!-- 하단 네비게이션 (3분할) -->
     <div class="absolute bottom-6 left-0 w-full px-5 z-50 pointer-events-none">
       <nav class="bg-white border-4 border-black pixel-shadow flex pointer-events-auto">
         <button id="nav-record" class="flex-1 flex flex-col items-center justify-center py-3 bg-black text-white transition-colors border-r-4 border-black">
-          <span class="text-[12px] font-black tracking-widest">[ RECORD ]</span>
+          <span class="text-[10px] font-black tracking-widest">[ RECORD ]</span>
+        </button>
+        <button id="nav-diet" class="flex-1 flex flex-col items-center justify-center py-3 bg-white text-black hover:bg-zinc-200 transition-colors border-r-4 border-black">
+          <span class="text-[10px] font-black tracking-widest">[ DIET ]</span>
         </button>
         <button id="nav-calendar" class="flex-1 flex flex-col items-center justify-center py-3 bg-white text-black hover:bg-zinc-200 transition-colors">
-          <span class="text-[12px] font-black tracking-widest">[ HISTORY ]</span>
+          <span class="text-[10px] font-black tracking-widest">[ HISTORY ]</span>
         </button>
       </nav>
     </div>
@@ -226,6 +264,8 @@
     let records = JSON.parse(localStorage.getItem('retro_workout_data')) || {};
     let currentDate = new Date();
     let selectedDateStr = null;
+    let restTimerInterval = null;
+    let restSeconds = 0;
     
     const defaultExercises = [
       'Bench Press', 'Incline Bench', 'Pec Deck Fly', 'Push Up', 'Dips',
@@ -244,12 +284,20 @@
     let sortableInstance = null;
 
     // --- DOM 요소 할당 ---
-    const views = { record: document.getElementById('view-record'), calendar: document.getElementById('view-calendar') };
-    const navs = { record: document.getElementById('nav-record'), calendar: document.getElementById('nav-calendar') };
+    const views = { 
+      record: document.getElementById('view-record'), 
+      diet: document.getElementById('view-diet'), 
+      calendar: document.getElementById('view-calendar') 
+    };
+    const navs = { 
+      record: document.getElementById('nav-record'), 
+      diet: document.getElementById('nav-diet'), 
+      calendar: document.getElementById('nav-calendar') 
+    };
     const weightEl = document.getElementById('current-weight');
     const repsEl = document.getElementById('current-reps');
     
-    // 모달 DOM (추가)
+    // 모달 DOM
     const modalAddEx = document.getElementById('modal-add-ex');
     const inputNewEx = document.getElementById('input-new-ex');
     const btnOpenAddModal = document.getElementById('btn-open-add-modal');
@@ -257,7 +305,6 @@
     const btnAddExCancel = document.getElementById('btn-add-ex-cancel');
     const modalError = document.getElementById('modal-error');
 
-    // 모달 DOM (삭제)
     const modalDeleteEx = document.getElementById('modal-delete-ex');
     const btnOpenDeleteModal = document.getElementById('btn-open-delete-modal');
     const btnDeleteExConfirm = document.getElementById('btn-delete-ex-confirm');
@@ -275,47 +322,43 @@
     const todayStr = formatDate(new Date());
     document.getElementById('header-date').innerText = todayStr;
 
-    // --- 탭 전환 ---
+    // --- 탭 전환 로직 ---
     function switchTab(tab) {
-      if (tab === 'record') {
-        views.record.style.display = 'flex'; views.calendar.style.display = 'none';
-        navs.record.className = "flex-1 flex flex-col items-center justify-center py-3 bg-black text-white transition-colors border-r-4 border-black";
-        navs.calendar.className = "flex-1 flex flex-col items-center justify-center py-3 bg-white text-black hover:bg-zinc-200 transition-colors";
-      } else {
-        views.record.style.display = 'none'; views.calendar.style.display = 'flex';
-        navs.calendar.className = "flex-1 flex flex-col items-center justify-center py-3 bg-black text-white transition-colors";
-        navs.record.className = "flex-1 flex flex-col items-center justify-center py-3 bg-white text-black hover:bg-zinc-200 transition-colors border-r-4 border-black";
-        renderCalendar();
-      }
+      // 뷰 토글
+      Object.keys(views).forEach(k => {
+        views[k].style.display = (k === tab) ? 'flex' : 'none';
+      });
+
+      // 버튼 스타일 클래스
+      const activeClass = "flex-1 flex flex-col items-center justify-center py-3 bg-black text-white transition-colors border-r-4 border-black";
+      const inactiveClass = "flex-1 flex flex-col items-center justify-center py-3 bg-white text-black hover:bg-zinc-200 transition-colors border-r-4 border-black";
+
+      navs.record.className = tab === 'record' ? activeClass : inactiveClass;
+      navs.diet.className = tab === 'diet' ? activeClass : inactiveClass;
+      // 마지막 탭은 우측 보더 제거 유지
+      navs.calendar.className = tab === 'calendar' ? activeClass.replace('border-r-4 border-black', '') : inactiveClass.replace('border-r-4 border-black', '');
+
+      if (tab === 'record') renderWorkoutTimeline();
+      if (tab === 'diet') renderDietTimeline();
+      if (tab === 'calendar') renderCalendar();
     }
+    
     navs.record.addEventListener('click', () => switchTab('record'));
+    navs.diet.addEventListener('click', () => switchTab('diet'));
     navs.calendar.addEventListener('click', () => switchTab('calendar'));
 
-    // --- 모달 제어 (종목 추가 로직) ---
+    // --- 모달 제어 ---
     btnOpenAddModal.addEventListener('click', () => {
       modalAddEx.classList.remove('hidden');
       inputNewEx.value = '';
       modalError.classList.add('hidden');
       inputNewEx.focus();
     });
-
-    btnAddExCancel.addEventListener('click', () => {
-      modalAddEx.classList.add('hidden');
-    });
-
+    btnAddExCancel.addEventListener('click', () => modalAddEx.classList.add('hidden'));
     btnAddExConfirm.addEventListener('click', () => {
       const newEx = inputNewEx.value.trim();
-      if (newEx === '') {
-        modalError.innerText = "Please enter a name.";
-        modalError.classList.remove('hidden');
-        return;
-      }
-      if (exercises.includes(newEx)) {
-        modalError.innerText = "Exercise already exists.";
-        modalError.classList.remove('hidden');
-        return;
-      }
-      
+      if (newEx === '') { modalError.innerText = "Please enter a name."; modalError.classList.remove('hidden'); return; }
+      if (exercises.includes(newEx)) { modalError.innerText = "Exercise already exists."; modalError.classList.remove('hidden'); return; }
       exercises.push(newEx);
       localStorage.setItem('retro_exercises_order', JSON.stringify(exercises));
       currentExercise = newEx;
@@ -323,24 +366,14 @@
       modalAddEx.classList.add('hidden');
     });
 
-    // --- 모달 제어 (종목 삭제 로직) ---
     btnOpenDeleteModal.addEventListener('click', () => {
       deleteTargetName.innerText = currentExercise;
       modalDeleteError.classList.add('hidden');
       modalDeleteEx.classList.remove('hidden');
     });
-
-    btnDeleteExCancel.addEventListener('click', () => {
-      modalDeleteEx.classList.add('hidden');
-    });
-
+    btnDeleteExCancel.addEventListener('click', () => modalDeleteEx.classList.add('hidden'));
     btnDeleteExConfirm.addEventListener('click', () => {
-      if (exercises.length <= 1) {
-        modalDeleteError.innerText = "Cannot delete the last exercise.";
-        modalDeleteError.classList.remove('hidden');
-        return;
-      }
-      
+      if (exercises.length <= 1) { modalDeleteError.innerText = "Cannot delete the last exercise."; modalDeleteError.classList.remove('hidden'); return; }
       exercises = exercises.filter(ex => ex !== currentExercise);
       localStorage.setItem('retro_exercises_order', JSON.stringify(exercises));
       currentExercise = exercises[0];
@@ -348,21 +381,15 @@
       modalDeleteEx.classList.add('hidden');
     });
 
-    // --- 종목 선택기 렌더링 (가로 스크롤 & 빠른 드래그) ---
+    // --- 종목 선택기 렌더링 ---
     function renderExerciseList() {
       const container = document.getElementById('exercise-list');
-      
       container.innerHTML = exercises.map(ex => {
         const isActive = ex === currentExercise;
         const styleClass = isActive 
           ? 'bg-black text-white border-black translate-x-[2px] translate-y-[2px] shadow-none' 
           : 'bg-white text-black border-black pixel-shadow-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none';
-        
-        return `
-          <button class="ex-btn shrink-0 px-2 py-1.5 text-[10px] font-black transition-all border-2 touch-manipulation ${styleClass}" data-name="${ex}">
-            ${ex}
-          </button>
-        `;
+        return `<button class="ex-btn shrink-0 px-2 py-1.5 text-[10px] font-black transition-all border-2 touch-manipulation ${styleClass}" data-name="${ex}">${ex}</button>`;
       }).join('');
 
       document.querySelectorAll('.ex-btn').forEach(btn => {
@@ -373,17 +400,11 @@
       });
 
       if (sortableInstance) sortableInstance.destroy();
-      
       sortableInstance = new window.Sortable(container, {
-        animation: 100, // 애니메이션 속도 더 빠르게 (100ms)
-        delay: 200,     // 0.2초 대기 (기존 0.4초에서 단축)
-        fallbackTolerance: 5, // 터치 시 미세한 떨림을 스크롤로 오해하지 않도록 방지
-        delayOnTouchOnly: true,
-        ghostClass: 'sortable-ghost',
-        dragClass: 'sortable-drag',
+        animation: 100, delay: 200, fallbackTolerance: 5, delayOnTouchOnly: true,
+        ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
         onEnd: function () {
-          const newOrder = Array.from(container.querySelectorAll('.ex-btn')).map(btn => btn.dataset.name);
-          exercises = newOrder;
+          exercises = Array.from(container.querySelectorAll('.ex-btn')).map(btn => btn.dataset.name);
           localStorage.setItem('retro_exercises_order', JSON.stringify(exercises));
         }
       });
@@ -396,77 +417,105 @@
       weightEl.innerText = currentWeight;
       if (navigator.vibrate) navigator.vibrate(20);
     });
-    document.getElementById('btn-weight-plus').addEventListener('click', () => {
-      currentWeight += 5;
-      weightEl.innerText = currentWeight;
-      if (navigator.vibrate) navigator.vibrate(20);
-    });
-    document.getElementById('btn-reps-minus').addEventListener('click', () => {
-      if (currentReps > 1) currentReps--;
-      repsEl.innerText = currentReps;
-      if (navigator.vibrate) navigator.vibrate(20);
-    });
-    document.getElementById('btn-reps-plus').addEventListener('click', () => {
-      currentReps++;
-      repsEl.innerText = currentReps;
-      if (navigator.vibrate) navigator.vibrate(20);
-    });
+    document.getElementById('btn-weight-plus').addEventListener('click', () => { currentWeight += 5; weightEl.innerText = currentWeight; if (navigator.vibrate) navigator.vibrate(20); });
+    document.getElementById('btn-reps-minus').addEventListener('click', () => { if (currentReps > 1) currentReps--; repsEl.innerText = currentReps; if (navigator.vibrate) navigator.vibrate(20); });
+    document.getElementById('btn-reps-plus').addEventListener('click', () => { currentReps++; repsEl.innerText = currentReps; if (navigator.vibrate) navigator.vibrate(20); });
 
-    // --- 데이터 저장 및 타임라인 렌더링 ---
-    function saveRecord() {
-      if (!records[todayStr]) records[todayStr] = [];
+    // --- 타이머 기능 ---
+    function startRestTimer() {
+      if (restTimerInterval) clearInterval(restTimerInterval);
+      restSeconds = 60; // 1분
       
+      const timerEl = document.getElementById('header-timer');
+      const versionEl = document.getElementById('header-version');
+      
+      timerEl.classList.remove('hidden');
+      versionEl.classList.add('hidden');
+      
+      updateTimerDisplay();
+
+      restTimerInterval = setInterval(() => {
+        restSeconds--;
+        updateTimerDisplay();
+        
+        if (restSeconds <= 0) {
+          clearInterval(restTimerInterval);
+          restTimerInterval = null;
+          timerEl.classList.add('hidden');
+          versionEl.classList.remove('hidden');
+          
+          // 알림 및 진동
+          if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+          setTimeout(() => alert('휴식 시간 1분이 종료되었습니다.\n다음 세트를 준비하세요!'), 100);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById('header-timer');
+      const m = String(Math.floor(restSeconds / 60)).padStart(2, '0');
+      const s = String(restSeconds % 60).padStart(2, '0');
+      timerEl.innerText = `REST ${m}:${s}`;
+    }
+
+    // --- 데이터 저장 및 타임라인 (운동) ---
+    function saveWorkoutRecord() {
+      if (!records[todayStr]) records[todayStr] = [];
       const now = new Date();
-      const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
       
       records[todayStr].push({
         id: Date.now(),
+        type: 'workout', // 타입 지정
         exercise: currentExercise,
         weight: currentWeight,
         reps: currentReps,
-        time: timeStr
+        time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
       });
       
       localStorage.setItem('retro_workout_data', JSON.stringify(records));
-      renderTimeline();
+      renderWorkoutTimeline();
     }
 
     document.getElementById('btn-record-set').addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-      saveRecord();
+      saveWorkoutRecord();
+      startRestTimer(); // 기록 시 타이머 자동 시작
     });
 
-    document.getElementById('btn-undo').addEventListener('click', () => {
+    document.getElementById('btn-undo-workout').addEventListener('click', () => {
       if (records[todayStr] && records[todayStr].length > 0) {
-        records[todayStr].pop();
+        // 마지막 운동 기록을 찾아서 삭제
+        for (let i = records[todayStr].length - 1; i >= 0; i--) {
+          if (!records[todayStr][i].type || records[todayStr][i].type === 'workout') {
+            records[todayStr].splice(i, 1);
+            break;
+          }
+        }
         localStorage.setItem('retro_workout_data', JSON.stringify(records));
-        renderTimeline();
+        renderWorkoutTimeline();
         if (navigator.vibrate) navigator.vibrate(20);
       }
     });
 
-    function renderTimeline() {
-      const todayRecords = records[todayStr] || [];
-      document.getElementById('today-total-sets').innerText = `TOTAL: ${todayRecords.length}`;
+    function renderWorkoutTimeline() {
+      const allToday = records[todayStr] || [];
+      const workoutRecords = allToday.filter(r => !r.type || r.type === 'workout');
       
-      const btnUndo = document.getElementById('btn-undo');
-      if (todayRecords.length > 0) {
-        btnUndo.classList.remove('hidden');
-      } else {
-        btnUndo.classList.add('hidden');
-      }
+      document.getElementById('today-total-sets').innerText = `TOTAL: ${workoutRecords.length}`;
+      const btnUndo = document.getElementById('btn-undo-workout');
+      btnUndo.classList.toggle('hidden', workoutRecords.length === 0);
       
       const container = document.getElementById('timeline-container');
-      if (todayRecords.length === 0) {
+      if (workoutRecords.length === 0) {
         container.innerHTML = `<div class="text-center py-6 text-zinc-500 text-sm font-bold border-4 border-dashed border-zinc-300">NO DATA YET.</div>`;
         return;
       }
 
-      const reversed = [...todayRecords].reverse();
+      const reversed = [...workoutRecords].reverse();
       container.innerHTML = reversed.map((rec, index) => `
         <div class="flex flex-col bg-white border-4 border-black p-3 pixel-shadow relative mb-2">
           <div class="absolute -top-3 -left-3 bg-black text-white w-6 h-6 flex items-center justify-center font-bold text-xs border-2 border-white shadow-[2px_2px_0px_0px_#000]">
-            ${todayRecords.length - index}
+            ${workoutRecords.length - index}
           </div>
           <div class="flex justify-between items-start pl-4">
             <div>
@@ -482,7 +531,73 @@
       `).join('');
     }
 
-    // --- 캘린더 로직 ---
+    // --- 식단 데이터 로직 ---
+    document.getElementById('btn-add-diet').addEventListener('click', () => {
+      const select = document.getElementById('food-select');
+      const protein = parseInt(select.value);
+      const foodName = select.options[select.selectedIndex].text.split('(')[0].trim();
+      
+      if (!records[todayStr]) records[todayStr] = [];
+      const now = new Date();
+      
+      records[todayStr].push({
+        id: Date.now(),
+        type: 'diet',
+        food: foodName,
+        protein: protein,
+        time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+      });
+      
+      localStorage.setItem('retro_workout_data', JSON.stringify(records));
+      renderDietTimeline();
+      if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    });
+
+    document.getElementById('btn-undo-diet').addEventListener('click', () => {
+      if (records[todayStr] && records[todayStr].length > 0) {
+        for (let i = records[todayStr].length - 1; i >= 0; i--) {
+          if (records[todayStr][i].type === 'diet') {
+            records[todayStr].splice(i, 1);
+            break;
+          }
+        }
+        localStorage.setItem('retro_workout_data', JSON.stringify(records));
+        renderDietTimeline();
+        if (navigator.vibrate) navigator.vibrate(20);
+      }
+    });
+
+    function renderDietTimeline() {
+      const allToday = records[todayStr] || [];
+      const dietRecords = allToday.filter(r => r.type === 'diet');
+      
+      const totalProtein = dietRecords.reduce((sum, r) => sum + (r.protein || 0), 0);
+      document.getElementById('today-total-protein').innerText = `TOTAL: ${totalProtein}g`;
+      
+      const btnUndo = document.getElementById('btn-undo-diet');
+      btnUndo.classList.toggle('hidden', dietRecords.length === 0);
+      
+      const container = document.getElementById('diet-timeline-container');
+      if (dietRecords.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-zinc-500 text-sm font-bold border-4 border-dashed border-zinc-300">NO DATA YET.</div>`;
+        return;
+      }
+
+      const reversed = [...dietRecords].reverse();
+      container.innerHTML = reversed.map((rec) => `
+        <div class="flex items-center justify-between bg-white border-4 border-black p-3 pixel-shadow mb-2">
+          <div>
+            <p class="font-black text-black text-sm">${rec.food}</p>
+            <p class="text-[10px] text-zinc-500 font-bold mt-1">${rec.time}</p>
+          </div>
+          <div class="text-right">
+            <p class="font-black text-base text-black">+${rec.protein}g</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- 캘린더 연동 로직 ---
     document.getElementById('btn-prev-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
     document.getElementById('btn-next-month').addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
 
@@ -511,30 +626,37 @@
       for (let day = 1; day <= daysInMonth; day++) {
         const dateObj = new Date(year, month, day);
         const dateStr = formatDate(dateObj);
-        const dailySets = records[dateStr] ? records[dateStr].length : 0;
         
-        const isToday = dateStr === todayStr;
+        // 캘린더 색상은 "운동(세트 수)" 기준으로 표시
+        const dailyAll = records[dateStr] || [];
+        const dailyWorkouts = dailyAll.filter(r => !r.type || r.type === 'workout').length;
+        
         const isFuture = dateObj > realToday;
         
         let bgClass = 'bg-white text-zinc-400';
         if (isFuture) {
           bgClass = 'bg-transparent text-zinc-300 border-dashed border-zinc-300';
-        } else if (dailySets > 0) {
-          if (dailySets <= 3) bgClass = 'bg-zinc-300 text-black';
-          else if (dailySets <= 8) bgClass = 'bg-zinc-500 text-white';
-          else if (dailySets <= 15) bgClass = 'bg-zinc-800 text-white';
+        } else if (dailyWorkouts > 0) {
+          if (dailyWorkouts <= 3) bgClass = 'bg-zinc-300 text-black';
+          else if (dailyWorkouts <= 8) bgClass = 'bg-zinc-500 text-white';
+          else if (dailyWorkouts <= 15) bgClass = 'bg-zinc-800 text-white';
           else bgClass = 'bg-black text-white';
         }
 
         const isSelected = dateStr === selectedDateStr;
         const selectionClass = isSelected ? 'border-[3px] border-black scale-110 z-10' : 'border-2 border-black';
-        const shadowClass = (dailySets > 0 && !isFuture && !isSelected) ? 'pixel-shadow-sm' : '';
+        const shadowClass = (dailyWorkouts > 0 && !isFuture && !isSelected) ? 'pixel-shadow-sm' : '';
+
+        // 단백질 기록이 있으면 작은 점 표시 (선택적)
+        const hasDiet = dailyAll.some(r => r.type === 'diet');
+        const dotHtml = hasDiet && !isFuture ? `<div class="w-1.5 h-1.5 rounded-full bg-red-500 absolute top-1 right-1 border border-black"></div>` : '';
 
         html += `
-          <div class="aspect-square p-0.5">
+          <div class="aspect-square p-0.5 relative">
             <button class="cal-day w-full h-full flex flex-col items-center justify-center text-[10px] font-black transition-all ${bgClass} ${selectionClass} ${shadowClass}" data-date="${dateStr}" ${isFuture ? 'disabled' : ''}>
               ${day}
             </button>
+            ${dotHtml}
           </div>
         `;
       }
@@ -551,33 +673,52 @@
       document.getElementById('selected-date-title').innerText = `${y}.${m}.${d}`;
       
       const dailyData = records[selectedDateStr] || [];
-      document.getElementById('selected-date-count').innerText = `${dailyData.length} SETS`;
+      const workouts = dailyData.filter(r => !r.type || r.type === 'workout');
+      const diets = dailyData.filter(r => r.type === 'diet');
+      const totalProtein = diets.reduce((sum, r) => sum + (r.protein || 0), 0);
+      
+      document.getElementById('selected-date-summary').innerText = `${workouts.length} SETS / ${totalProtein}g`;
       
       const logsContainer = document.getElementById('selected-date-logs');
       if (dailyData.length === 0) {
         logsContainer.innerHTML = '<p class="text-zinc-500 text-xs font-bold py-2">> REST DAY</p>';
       } else {
-        logsContainer.innerHTML = dailyData.map(rec => `
-          <div class="flex items-center justify-between py-2 border-b-2 border-dashed border-zinc-300 last:border-0">
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] text-zinc-500 w-10">${rec.time}</span>
-              <span class="text-[11px] font-black text-black">${rec.exercise}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-black text-black">${rec.weight}<span class="text-[9px] text-zinc-500">KG</span></span>
-              <span class="text-xs font-black text-zinc-700 ml-1">x${rec.reps}</span>
-            </div>
-          </div>
-        `).join('');
+        logsContainer.innerHTML = dailyData.map(rec => {
+          if (rec.type === 'diet') {
+            return `
+              <div class="flex items-center justify-between py-2 border-b-2 border-dashed border-zinc-300 last:border-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-zinc-500 w-10">${rec.time}</span>
+                  <span class="text-[11px] font-black text-black bg-zinc-200 px-1">DIET</span>
+                  <span class="text-[11px] font-black text-black">${rec.food}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-xs font-black text-black">+${rec.protein}g</span>
+                </div>
+              </div>`;
+          } else {
+            return `
+              <div class="flex items-center justify-between py-2 border-b-2 border-dashed border-zinc-300 last:border-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-zinc-500 w-10">${rec.time}</span>
+                  <span class="text-[11px] font-black text-black">${rec.exercise}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-black text-black">${rec.weight}<span class="text-[9px] text-zinc-500">KG</span></span>
+                  <span class="text-xs font-black text-zinc-700 ml-1">x${rec.reps}</span>
+                </div>
+              </div>`;
+          }
+        }).join('');
       }
     }
 
     // --- 초기화 ---
     renderExerciseList();
-    renderTimeline();
     switchTab('record');
   </script>
 </body>
 </html>
+
 
 ```
