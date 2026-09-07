@@ -85,7 +85,7 @@
         REST 01:00
       </div>
       <div id="header-version" class="border-2 border-black bg-zinc-200 px-2 py-1 pixel-shadow-sm text-xs font-bold">
-        v1.3
+        v1.4
       </div>
     </header>
 
@@ -128,15 +128,27 @@
           </div>
         </div>
 
+        <!-- 커스텀 휴식 시간 컨트롤러 -->
+        <div class="mt-4 flex justify-center px-5">
+          <div class="border-4 border-black bg-white p-2 pixel-shadow flex flex-col w-48">
+            <p class="text-[10px] font-bold text-center mb-2 border-b-2 border-black pb-1">REST(SEC)</p>
+            <div class="flex items-center justify-between mt-1">
+              <button id="btn-rest-minus" class="w-8 h-8 bg-zinc-300 border-2 border-black flex items-center justify-center text-xl font-bold pixel-shadow-sm pixel-active-sm">-</button>
+              <div class="flex flex-col items-center"><span id="current-rest-val" class="text-2xl font-black">60</span></div>
+              <button id="btn-rest-plus" class="w-8 h-8 bg-zinc-300 border-2 border-black flex items-center justify-center text-xl font-bold pixel-shadow-sm pixel-active-sm">+</button>
+            </div>
+          </div>
+        </div>
+
         <!-- 메인 세트 기록 버튼 -->
-        <div class="flex justify-center mt-10 mb-8 relative">
+        <div class="flex justify-center mt-8 mb-8 relative">
           <button id="btn-record-set" class="relative z-10 w-48 h-48 rounded-full bg-zinc-600 border-[8px] border-black flex flex-col items-center justify-center pixel-shadow transition-transform duration-75 active:translate-x-[4px] active:translate-y-[4px] active:shadow-none outline-none overflow-hidden">
             <div class="absolute inset-2 rounded-full border-4 border-zinc-800 opacity-50 pointer-events-none"></div>
             <div class="absolute inset-8 rounded-full border-4 border-zinc-500 pointer-events-none"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white border-[6px] border-black rounded-full pointer-events-none"></div>
             
             <span class="absolute top-8 text-3xl font-black text-white tracking-widest drop-shadow-[2px_2px_0_rgba(0,0,0,1)] pointer-events-none">PUSH</span>
-            <span class="absolute bottom-9 text-[10px] font-bold text-zinc-300 bg-black px-2 py-0.5 border-2 border-zinc-500 pointer-events-none text-center leading-tight">RECORD &<br>1M REST</span>
+            <span id="record-btn-text" class="absolute bottom-9 text-[10px] font-bold text-zinc-300 bg-black px-2 py-0.5 border-2 border-zinc-500 pointer-events-none text-center leading-tight">RECORD &<br>60S REST</span>
           </button>
         </div>
 
@@ -266,6 +278,10 @@
     let restTimerInterval = null;
     let restSeconds = 0;
     
+    // 사용자가 설정한 커스텀 휴식 시간 (기본값 60초)
+    let currentRestTime = parseInt(localStorage.getItem('retro_rest_time'));
+    if (isNaN(currentRestTime)) currentRestTime = 60;
+    
     const defaultExercises = [
       'Bench Press', 'Incline Bench', 'Pec Deck Fly', 'Push Up', 'Dips',
       'Squat', 'Leg Press', 'Leg Extension', 'Leg Curl', 'Calf Raise',
@@ -296,6 +312,10 @@
     const weightEl = document.getElementById('current-weight');
     const repsEl = document.getElementById('current-reps');
     
+    // 휴식 시간 관련 DOM
+    const restValEl = document.getElementById('current-rest-val');
+    const recordBtnTextEl = document.getElementById('record-btn-text');
+
     // 모달 DOM
     const modalAddEx = document.getElementById('modal-add-ex');
     const inputNewEx = document.getElementById('input-new-ex');
@@ -409,7 +429,17 @@
       });
     }
 
-    // --- 중량 및 횟수 제어 ---
+    // --- UI 업데이트 로직 (휴식시간 포함) ---
+    function updateRestUI() {
+      restValEl.innerText = currentRestTime;
+      if (currentRestTime > 0) {
+        recordBtnTextEl.innerHTML = `RECORD &<br>${currentRestTime}S REST`;
+      } else {
+        recordBtnTextEl.innerHTML = `RECORD<br>ONLY`;
+      }
+    }
+
+    // --- 중량, 횟수, 휴식시간 제어 ---
     document.getElementById('btn-weight-minus').addEventListener('click', () => {
       if (currentWeight > 0) currentWeight -= 5;
       if (currentWeight < 0) currentWeight = 0;
@@ -417,13 +447,30 @@
       if (navigator.vibrate) navigator.vibrate(20);
     });
     document.getElementById('btn-weight-plus').addEventListener('click', () => { currentWeight += 5; weightEl.innerText = currentWeight; if (navigator.vibrate) navigator.vibrate(20); });
+    
     document.getElementById('btn-reps-minus').addEventListener('click', () => { if (currentReps > 1) currentReps--; repsEl.innerText = currentReps; if (navigator.vibrate) navigator.vibrate(20); });
     document.getElementById('btn-reps-plus').addEventListener('click', () => { currentReps++; repsEl.innerText = currentReps; if (navigator.vibrate) navigator.vibrate(20); });
 
+    document.getElementById('btn-rest-minus').addEventListener('click', () => {
+      if (currentRestTime > 0) currentRestTime -= 10;
+      if (currentRestTime < 0) currentRestTime = 0;
+      localStorage.setItem('retro_rest_time', currentRestTime);
+      updateRestUI();
+      if (navigator.vibrate) navigator.vibrate(20);
+    });
+    document.getElementById('btn-rest-plus').addEventListener('click', () => {
+      currentRestTime += 10;
+      localStorage.setItem('retro_rest_time', currentRestTime);
+      updateRestUI();
+      if (navigator.vibrate) navigator.vibrate(20);
+    });
+
     // --- 타이머 기능 ---
     function startRestTimer() {
+      if (currentRestTime <= 0) return; // 0초면 타이머 생략
+
       if (restTimerInterval) clearInterval(restTimerInterval);
-      restSeconds = 60; // 1분
+      restSeconds = currentRestTime; 
       
       const timerEl = document.getElementById('header-timer');
       const versionEl = document.getElementById('header-version');
@@ -445,7 +492,7 @@
           
           // 알림 및 진동
           if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
-          setTimeout(() => alert('휴식 시간 1분이 종료되었습니다.\n다음 세트를 준비하세요!'), 100);
+          setTimeout(() => alert('휴식 시간이 종료되었습니다.\n다음 세트를 준비하세요!'), 100);
         }
       }, 1000);
     }
@@ -464,7 +511,7 @@
       
       records[todayStr].push({
         id: Date.now(),
-        type: 'workout', // 타입 지정
+        type: 'workout',
         exercise: currentExercise,
         weight: currentWeight,
         reps: currentReps,
@@ -478,7 +525,7 @@
     document.getElementById('btn-record-set').addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
       saveWorkoutRecord();
-      startRestTimer(); // 기록 시 타이머 자동 시작
+      startRestTimer();
     });
 
     document.getElementById('btn-undo-workout').addEventListener('click', () => {
@@ -646,7 +693,7 @@
         const selectionClass = isSelected ? 'border-[3px] border-black scale-110 z-10' : 'border-2 border-black';
         const shadowClass = (dailyWorkouts > 0 && !isFuture && !isSelected) ? 'pixel-shadow-sm' : '';
 
-        // 단백질 기록이 있으면 작은 점 표시 (선택적)
+        // 단백질 기록이 있으면 작은 점 표시
         const hasDiet = dailyAll.some(r => r.type === 'diet');
         const dotHtml = hasDiet && !isFuture ? `<div class="w-1.5 h-1.5 rounded-full bg-red-500 absolute top-1 right-1 border border-black"></div>` : '';
 
@@ -714,10 +761,8 @@
 
     // --- 초기화 ---
     renderExerciseList();
+    updateRestUI(); // 휴식시간 UI 초기화 반영
     switchTab('record');
   </script>
 </body>
 </html>
-
-
-```
