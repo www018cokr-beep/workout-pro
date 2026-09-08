@@ -85,7 +85,7 @@
         REST 01:00
       </div>
       <div id="header-version" class="border-2 border-black bg-zinc-200 px-2 py-1 pixel-shadow-sm text-xs font-bold">
-        v1.4
+        v1.5
       </div>
     </header>
 
@@ -465,11 +465,16 @@
       if (navigator.vibrate) navigator.vibrate(20);
     });
 
-    // --- 타이머 기능 ---
+    // --- 타이머 기능 (백그라운드 유지 개선) ---
+    let expectedEndTime = 0;
+
     function startRestTimer() {
       if (currentRestTime <= 0) return; // 0초면 타이머 생략
 
       if (restTimerInterval) clearInterval(restTimerInterval);
+      
+      // 핵심: 타이머가 끝나는 절대 시각을 기록
+      expectedEndTime = Date.now() + (currentRestTime * 1000);
       restSeconds = currentRestTime; 
       
       const timerEl = document.getElementById('header-timer');
@@ -481,10 +486,12 @@
       updateTimerDisplay();
 
       restTimerInterval = setInterval(() => {
-        restSeconds--;
-        updateTimerDisplay();
+        // 목표 시각과 현재 시각의 차이로 남은 시간을 역산
+        restSeconds = Math.ceil((expectedEndTime - Date.now()) / 1000);
         
         if (restSeconds <= 0) {
+          restSeconds = 0;
+          updateTimerDisplay();
           clearInterval(restTimerInterval);
           restTimerInterval = null;
           timerEl.classList.add('hidden');
@@ -493,6 +500,8 @@
           // 알림 및 진동
           if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
           setTimeout(() => alert('휴식 시간이 종료되었습니다.\n다음 세트를 준비하세요!'), 100);
+        } else {
+          updateTimerDisplay();
         }
       }, 1000);
     }
